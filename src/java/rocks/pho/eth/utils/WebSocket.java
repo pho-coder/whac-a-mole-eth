@@ -19,6 +19,8 @@ import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ServerHandshake;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class WebSocket extends WebSocketClient {
 
     private static final String url = "wss://be.huobi.com/ws";
@@ -113,10 +115,10 @@ public class WebSocket extends WebSocketClient {
         //		chatclient.send(JSONObject.toJSONString(subModel));
 
         // 订阅数据深度
-        // SubModel subModel1 = new SubModel();
-        // subModel1.setSub("market.ethcny.depth.step1");
-        // subModel1.setId(10001L);
-        // chatclient.send(JSONObject.toJSONString(subModel1));
+        SubModel subModel1 = new SubModel();
+        subModel1.setSub("market.ethcny.depth.step1");
+        subModel1.setId(10001L);
+        client.send(JSONObject.toJSONString(subModel1));
         // 取消订阅省略
 
         // 请求数据 sub 根据自己需要请求数据
