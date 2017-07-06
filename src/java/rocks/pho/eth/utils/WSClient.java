@@ -38,10 +38,9 @@ public class WSClient extends WebSocketClient {
         this.connectBlocking();
 
         // 订阅数据深度
-        SubModel subModel = new SubModel();
-        subModel.setSub(topic);
-        subModel.setId(id);
-        this.send(JSONObject.toJSONString(subModel));
+        this.subModel.setSub(topic);
+        this.subModel.setId(id);
+        this.send(JSONObject.toJSONString(this.subModel));
     }
 
     @Override
@@ -66,7 +65,6 @@ public class WSClient extends WebSocketClient {
                 System.out.println("sent heartbeat at " + new Timestamp((new Long(market.substring(8, 21)))).toString());
             } else {
                 String topicStr = "\"ch\":\"" + this.subModel.getSub() + "\"";
-                System.out.println(topicStr);
                 if (market.contains(topicStr)) {
                     if (!queue.offer(market)) {
                         System.out.println("queue offer error: " + market);
