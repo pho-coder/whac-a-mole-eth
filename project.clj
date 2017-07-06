@@ -7,7 +7,9 @@
                  [org.clojure/tools.logging "0.4.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
                  [org.java-websocket/Java-WebSocket "1.3.4"]
-                 [com.alibaba/fastjson "1.2.34"]]
+                 [com.alibaba/fastjson "1.2.34"]
+                 [mount "0.1.11"]
+                 [org.clojure/data.json "0.2.6"]]
   :main ^:skip-aot rocks.pho.eth.whac-a-mole-eth
   :source-paths ["src" "src/clj"]
   :java-source-paths ["src/java"]

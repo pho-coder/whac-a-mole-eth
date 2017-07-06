@@ -65,12 +65,14 @@ public class WSClient extends WebSocketClient {
                 this.send(market.replace("ping", "pong"));
                 System.out.println("sent heartbeat at " + new Timestamp((new Long(market.substring(8, 21)))).toString());
             } else {
-                //   System.out.println(market);
-                if (market.contains("\"ch\":\"" + this.subModel.getSub() + "\"")) {
+                String topicStr = "\"ch\":\"" + this.subModel.getSub() + "\"";
+                System.out.println(topicStr);
+                if (market.contains(topicStr)) {
                     if (!queue.offer(market)) {
                         System.out.println("queue offer error: " + market);
                     }
                 } else {
+                    System.out.println("error data!!!!!!!!!!!");
                     System.out.println(market);
                 }
             }
