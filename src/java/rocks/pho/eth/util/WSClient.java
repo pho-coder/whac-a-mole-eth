@@ -1,4 +1,4 @@
-package rocks.pho.eth.utils;
+package rocks.pho.eth.util;
 
 import com.alibaba.fastjson.JSONObject;
 import org.java_websocket.client.WebSocketClient;
@@ -26,10 +26,10 @@ import java.sql.Timestamp;
 public class WSClient extends WebSocketClient {
 
     public LinkedBlockingQueue queue = null;
-    private SubModel subModel = new SubModel();
+    private SubModel marketDepthSubModel = new SubModel();
+    private SubModel tradeDetailSubModel = new SubModel();
 
-    public WSClient(String address, String topic, Long id) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
-        //      WebSocketImpl.DEBUG = true;
+    public WSClient(String address, String marketDepthTopic, Long marketDepthTopicId, String tradeDetailTopic, Long tradeDetailId) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException, IOException, InterruptedException {
         super(new URI(address));
 
         this.queue = new LinkedBlockingQueue<String>();
@@ -37,10 +37,13 @@ public class WSClient extends WebSocketClient {
         this.setSocket(this.getFactory().createSocket());
         this.connectBlocking();
 
-        // 订阅数据深度
-        this.subModel.setSub(topic);
-        this.subModel.setId(id);
-        this.send(JSONObject.toJSONString(this.subModel));
+        this.marketDepthSubModel.setSub(marketDepthTopic);
+        this.marketDepthSubModel.setId(marketDepthTopicId);
+        this.send(JSONObject.toJSONString(this.marketDepthSubModel));
+
+        this.tradeDetailSubModel.setSub(tradeDetailTopic);
+        this.tradeDetailSubModel.setId(tradeDetailId);
+        this.send(JSONObject.toJSONString(this.tradeDetailSubModel));
     }
 
     @Override
@@ -64,8 +67,9 @@ public class WSClient extends WebSocketClient {
                 this.send(market.replace("ping", "pong"));
                 System.out.println("sent heartbeat at " + new Timestamp((new Long(market.substring(8, 21)))).toString());
             } else {
-                String topicStr = "\"ch\":\"" + this.subModel.getSub() + "\"";
-                if (market.contains(topicStr)) {
+                String marketDepthTopicStr = "\"ch\":\"" + this.marketDepthSubModel.getSub() + "\"";
+                String tradeDetailTopicStr = "\"ch\":\"" + this.tradeDetailSubModel.getSub() + "\"";
+                if (market.contains(marketDepthTopicStr) || market.contains(tradeDetailTopicStr)) {
                     if (!queue.offer(market)) {
                         System.out.println("queue offer error: " + market);
                     }

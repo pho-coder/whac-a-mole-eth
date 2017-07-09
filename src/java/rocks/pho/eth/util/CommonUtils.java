@@ -1,4 +1,4 @@
-package rocks.pho.eth.utils;
+package rocks.pho.eth.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

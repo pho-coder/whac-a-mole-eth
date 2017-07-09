@@ -1,4 +1,4 @@
-package rocks.pho.eth.utils;
+package rocks.pho.eth.util;
 
 public class SubModel {
     private String sub;

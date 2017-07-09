@@ -9,7 +9,8 @@
                  [org.java-websocket/Java-WebSocket "1.3.4"]
                  [com.alibaba/fastjson "1.2.34"]
                  [mount "0.1.11"]
-                 [org.clojure/data.json "0.2.6"]]
+                 [org.clojure/data.json "0.2.6"]
+                 [com.jd.bdp.magpie/magpie-utils "0.1.4-SNAPSHOT"]]
   :main ^:skip-aot rocks.pho.eth.whac-a-mole-eth
   :source-paths ["src" "src/clj"]
   :java-source-paths ["src/java"]

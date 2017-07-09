@@ -3,7 +3,13 @@
   (:require [mount.core :as mount]
             [clojure.tools.logging :as log]
 
-            [rocks.pho.eth.watcher :as watcher]))
+            [rocks.pho.eth.watcher :as watcher]
+            [com.jd.bdp.magpie.util.timer :as timer]))
+
+(mount/defstate data-check-timer
+  :start (timer/mk-timer)
+  :stop (when @(:active data-check-timer)
+          (timer/cancel-timer data-check-timer)))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -13,4 +19,6 @@
                         mount/start-with-args
                         :started)]
     (log/info component "started"))
-  (watcher/get-new-depth-data))
+  (timer/schedule-recurring data-check-timer 2 5 watcher/data-check)
+  (while true
+    (Thread/sleep 1000)))
