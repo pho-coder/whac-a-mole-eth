@@ -54,10 +54,90 @@
          "diff bids percent1:\t" (:diff-bids-percent1 re) "\n"
          "diff asks percent1:\t" (:diff-asks-percent1 re))))
 
-(defn deal-trade-detail [tick-data]
+(defn cut-trade-detail [time-millis tick-data]
   (let [now-ts (System/currentTimeMillis)
-        before-now (- now-ts (* 5 60 1000))]
+        before-now (- now-ts time-millis)]
     (into (hash-set)
           (filter #(>= (:ts %)
                        before-now)
                   tick-data))))
+
+(defn sort-trade-detail [tick-data]
+  (let [lastest-tick (reduce #(if (>= (:ts %1)
+                                      (:ts %2))
+                                %1
+                                %2)
+                             (first tick-data) tick-data)
+        oldest-tick (reduce #(if (<= (:ts %1)
+                                     (:ts %2))
+                               %1
+                               %2)
+                            (first tick-data) tick-data)
+        buy->buy-market (filter #(and (= (:direction %) "buy")
+                                     (= (:type %) "buy-market"))
+                               tick-data)
+        buy->buy-limit (filter #(and (= (:direction %) "buy")
+                                     (= (:type %) "buy-limit"))
+                               tick-data)
+        sell->sell-market (filter #(and (= (:direction %) "sell")
+                                        (= (:type %) "sell-market"))
+                                  tick-data)
+        sell->sell-limit (filter #(and (= (:direction %) "sell")
+                                       (= (:type %) "sell-limit"))
+                                 tick-data)
+        sum-amount (fn [data]
+                     (reduce #(+ %1 (bigdec (:amount %2)))
+                             0M data))
+        buy->buy-market-amount (sum-amount buy->buy-market)
+        buy->buy-limit-amount (sum-amount buy->buy-limit)
+        sell->sell-market-amount (sum-amount sell->sell-market)
+        sell->sell-limit-amount (sum-amount sell->sell-limit)]
+    {:lastest-tick lastest-tick
+     :oldest-tick oldest-tick
+     :diff-price (- (bigdec (:price lastest-tick 0))
+                    (bigdec (:price oldest-tick 0)))
+     :buy->buy-market-amount buy->buy-market-amount
+     :buy->buy-limit-amount buy->buy-limit-amount
+     :sell->sell-market-amount sell->sell-market-amount
+     :sell->sell-limit-amount sell->sell-limit-amount
+     :diff-amount (- (+ buy->buy-market-amount buy->buy-limit-amount)
+                     (+ sell->sell-market-amount sell->sell-limit-amount))}))
+
+(defn deal-trade-detail [tick-data]
+  (let [now-ts (System/currentTimeMillis)
+        sec10-tick-data (cut-trade-detail (* 10 1000)
+                                          tick-data)
+        sec30-tick-data (cut-trade-detail (* 30 1000)
+                                          tick-data)
+        sec60-tick-data (cut-trade-detail (* 60 1000)
+                                          tick-data)]
+    {:sec10-size (.size sec10-tick-data)
+     :sec30-size (.size sec30-tick-data)
+     :sec60-size (.size sec60-tick-data)
+     :sec10-status (sort-trade-detail sec10-tick-data)
+     :sec30-status (sort-trade-detail sec30-tick-data)
+     :sec60-status (sort-trade-detail sec60-tick-data)}))
+
+(defn format-deal-trade-detail [tick-data]
+  (let [re (deal-trade-detail tick-data)]
+    (str "\n10sec size:\t" (:sec10-size re) "\n"
+         "\tdiffprice:\t" (:diff-price (:sec10-status re))
+         "\tdiff amount:" (:diff-amount (:sec10-status re))
+         "\tbuy->buy-market-amount:" (:buy->buy-market-amount (:sec10-status re))
+         "\tbuy->buy-limit-amount:" (:buy->buy-limit-amount (:sec10-status re))
+         "\tsell->sell-market-amount:" (:sell->sell-market-amount (:sec10-status re))
+         "\tsell->sell-limit-amount:" (:sell->sell-limit-amount (:sec10-status re))
+         "\n30sec size:\t" (:sec30-size re) "\n"
+         "\tdiff-price:\t" (:diff-price (:sec30-status re))
+         "\tdiff amount:" (:diff-amount (:sec30-status re))
+         "\tbuy->buy-market-amount:" (:buy->buy-market-amount (:sec30-status re))
+         "\tbuy->buy-limit-amount:" (:buy->buy-limit-amount (:sec30-status re))
+         "\tsell->sell-market-amount:" (:sell->sell-market-amount (:sec30-status re))
+         "\tsell->sell-limit-amount:" (:sell->sell-limit-amount (:sec30-status re))
+         "\n60sec size:\t" (:sec60-size re) "\n"
+         "\tdiff-price:\t" (:diff-price (:sec60-status re))
+         "\tdiff amount:" (:diff-amount (:sec60-status re))
+         "\tbuy->buy-market-amount:" (:buy->buy-market-amount (:sec60-status re))
+         "\tbuy->buy-limit-amount:" (:buy->buy-limit-amount (:sec60-status re))
+         "\tsell->sell-market-amount:" (:sell->sell-market-amount (:sec60-status re))
+         "\tsell->sell-limit-amount:" (:sell->sell-limit-amount (:sec60-status re)))))
