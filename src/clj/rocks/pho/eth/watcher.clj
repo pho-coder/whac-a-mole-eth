@@ -16,9 +16,9 @@
 (defn get-ws-client []
   (let [uri "wss://be.huobi.com/ws"
         depth-topic "market.ethcny.depth.percent10"
-        depth-id 1000
+        depth-id (rand-nth (range 1000 2000))
         trade-detail-topic "market.ethcny.trade.detail"
-        trade-detail-id 2000]
+        trade-detail-id (rand-nth (range 3000 4000))]
     (WSClient. uri depth-topic depth-id trade-detail-topic trade-detail-id)))
 
 (mount/defstate ws-client :start (get-ws-client))
@@ -52,6 +52,10 @@
   (log/info  "depth ws client open?:" (.isOpen ws-client)
              "close?:" (.isClosed ws-client)
              "queue size:" (.size (.queue ws-client)))
+  (when (or (.isClosed ws-client)
+            (not (.isOpen ws-client)))
+    (log/error "ws client ERROR!")
+    (mount/start-with {#'ws-client (get-ws-client)}))
   (mount/start-with {#'last-trade-detail-data (utils/cut-trade-detail (* 5 60 1000)
                                                                       last-trade-detail-data)})
 ;  (log/info last-trade-detail-data)
