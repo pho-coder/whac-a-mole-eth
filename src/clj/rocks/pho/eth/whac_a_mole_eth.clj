@@ -2,9 +2,10 @@
   (:gen-class)
   (:require [mount.core :as mount]
             [clojure.tools.logging :as log]
-
+            [com.jd.bdp.magpie.util.timer :as timer]
+            
             [rocks.pho.eth.watcher :as watcher]
-            [com.jd.bdp.magpie.util.timer :as timer]))
+            [rocks.pho.eth.config :refer [env]]))
 
 (mount/defstate data-check-timer
   :start (timer/mk-timer)

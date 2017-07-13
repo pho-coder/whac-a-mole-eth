@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -e
+source ~/.bashrc
+bin=`dirname $0`
+bin=`cd "$bin"; pwd`
+ETH_HOME=`cd "$bin"/..;pwd`
+
+export BTC_DATA_PATH=~/btc-data
+export FIXED_KLINES_DATA_PATH=$BTC_DATA_PATH/fixed-klines-data
+export CURRENT_KLINES_DATA_PATH=$BTC_DATA_PATH/current-klines-data
+export DETAIL_DATA_PATH=$BTC_DATA_PATH/detail-data
+export DEPTH_DATA_PATH=$BTC_DATA_PATH/depth-data
+export SERVER_URL="http://155.254.32.231:3000/api"
+export SECRET_CODE=79013
+export WATCHER_PID_FILE=/home/phoenix/Tools/whac-a-mole/pid
+export CHECK_TIMES=3
+export TIMER_INTERVAL_TIME=2
+export MUST_SELL_RATE=4
+export CORE_INFO_PATH=$BTC_DATA_PATH/core-info
+
+export ETH_DATA_PATH=~/eth-data
+export ETH_RAW_DATA_PATH=~/eth-data/raw-data/
+/usr/bin/nohup /usr/bin/java -Duser.timezone=Asia/Shanghai -Dlogback.configurationFile=${ETH_HOME}/conf/logback.xml -Deth.home=${ETH_HOME} -jar ${ETH_HOME}/lib/whac-a-mole-eth-0.1.0-SNAPSHOT-standalone.jar > ${ETH_HOME}/log/whac-a-mole-eth.out 2>&1 &

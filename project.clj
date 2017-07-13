@@ -1,4 +1,4 @@
-(defproject rocks.pho.eth/whac-a-mole-eth "0.1.0-SNAPSHOT"
+(defproject rocks.pho.eth/whac-a-mole-eth "0.1.1-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -10,6 +10,7 @@
                  [com.alibaba/fastjson "1.2.34"]
                  [mount "0.1.11"]
                  [org.clojure/data.json "0.2.6"]
+                 [cprop "0.1.10"]
                  [com.jd.bdp.magpie/magpie-utils "0.1.4-SNAPSHOT"]]
   :main ^:skip-aot rocks.pho.eth.whac-a-mole-eth
   :source-paths ["src" "src/clj"]

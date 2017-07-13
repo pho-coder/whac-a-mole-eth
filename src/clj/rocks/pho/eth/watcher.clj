@@ -3,10 +3,11 @@
             [clojure.tools.logging :as log]
             [clojure.data.json :as json]
 
-            [rocks.pho.eth.util.utils :as utils])
+            [rocks.pho.eth.util.utils :as utils]
+            [rocks.pho.eth.config :refer [env]])
   (:import [rocks.pho.eth.util WSClient]))
 
-(mount/defstate raw-data-file-name :start (str "/tmp/data."
+(mount/defstate raw-data-file-name :start (str (:eth-raw-data-path env "/tmp") "/data."
                                                (.format (java.text.SimpleDateFormat. "yyyy-MM-dd_HH_mm_ss")
                                                         (java.util.Date.))))
 (mount/defstate last-depth-tick-version :start 0)
