@@ -7,10 +7,9 @@
             [rocks.pho.eth.config :refer [env]])
   (:import [rocks.pho.eth.util WSClient]))
 
-(mount/defstate raw-data-file-name :start (str (:eth-raw-data-path env "/tmp") "/data."
-                                               (.format (java.text.SimpleDateFormat. "yyyy-MM-dd_HH_mm_ss")
-                                                        (java.util.Date.))))
+
 (mount/defstate last-depth-tick-version :start 0)
+(mount/defstate last-depth-tick-data :start (hash-set))
 (mount/defstate last-trade-detail-tick-id :start 0)
 (mount/defstate last-trade-detail-data :start (hash-set))
 
@@ -29,14 +28,13 @@
     (let [data-str (.take (.queue ws-client))
           data (json/read-str data-str
                               :key-fn keyword)]
-      (spit raw-data-file-name
-            (str data-str "\n")
-            :append true)
+      (utils/log-data data-str)
       (case (:ch data)
-        "market.ethcny.depth.percent10" (let [tick-data (:tick data)
+        "market.ethcny.depth.percent10" (let [ts (:ts data)
+                                              tick-data (:tick data)
                                               version (:version tick-data)]
                                           (if (> version last-depth-tick-version)
-                                            (do (log/info (utils/format-deal-depth-tick-data tick-data))
+                                            (do (mount/start-with {#'last-depth-tick-data (utils/deal-depth-tick-data tick-data ts)})
                                                 (mount/start-with {#'last-depth-tick-version version}))
                                             (log/warn "error depth version:" version "last version:" last-depth-tick-version)))
         "market.ethcny.trade.detail" (let [tick-data (:tick data)
@@ -57,8 +55,10 @@
             (not (.isOpen ws-client)))
     (log/error "ws client ERROR!")
     (mount/start-with {#'ws-client (get-ws-client)}))
+  (log/info "depth data:" (utils/format-depth-tick-data last-depth-tick-data))
   (mount/start-with {#'last-trade-detail-data (utils/cut-trade-detail (* 5 60 1000)
                                                                       last-trade-detail-data)})
-;  (log/info last-trade-detail-data)
-  (log/info "trade detail data size:" (.size last-trade-detail-data))
-  (log/info "trade detail:" (utils/format-deal-trade-detail last-trade-detail-data)))
+  (let [time-points [10 30 60 120 180]
+        trade-detail (utils/deal-trade-detail last-trade-detail-data time-points)]
+    (log/info "trade detail data size:" (.size last-trade-detail-data))
+    (log/info "trade detail:" (utils/format-deal-trade-detail trade-detail time-points))))
