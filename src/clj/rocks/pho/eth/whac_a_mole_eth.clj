@@ -8,9 +8,7 @@
             [rocks.pho.eth.config :refer [env]]))
 
 (mount/defstate data-check-timer
-  :start (timer/mk-timer)
-  :stop (when @(:active data-check-timer)
-          (timer/cancel-timer data-check-timer)))
+  :start (timer/mk-timer))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -22,4 +20,8 @@
     (log/info component "started"))
   (timer/schedule-recurring data-check-timer 2 5 watcher/data-check)
   (while true
-    (Thread/sleep 1000)))
+    (Thread/sleep 10000)
+    (log/info "data check timer active:" @(:active data-check-timer))
+    (when-not @(:active data-check-timer)
+      (log/error "data check timer inactive!")
+      (timer/schedule-recurring data-check-timer 2 5 watcher/data-check))))
