@@ -24,4 +24,5 @@
     (log/info "data check timer active:" @(:active data-check-timer))
     (when-not @(:active data-check-timer)
       (log/error "data check timer inactive!")
+      (mount/start-with {#'data-check-timer (timer/mk-timer)})
       (timer/schedule-recurring data-check-timer 2 5 watcher/data-check))))
